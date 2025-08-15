@@ -17,7 +17,7 @@
 ## 🚀 Instalación
 
 ```bash
-composer require gambito404/tools-table
+composer require gambito404/tools-tables
 ```
 ---
 Opcionalmente, publica los archivos si deseas personalizar vistas o configuración:
