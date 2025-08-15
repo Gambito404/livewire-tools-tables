@@ -1,5 +1,5 @@
 {
-    "name": "gambito404/tools-table",
+    "name": "gambito404/tools-tables",
     "description": "Tabla dinámica para Livewire con soporte de columnas, filtros y temas.",
     "type": "library",
     "license": "MIT",
