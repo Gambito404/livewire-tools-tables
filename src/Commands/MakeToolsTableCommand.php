@@ -8,12 +8,11 @@ use Illuminate\Support\Str;
 
 class MakeToolsTableCommand extends Command
 {
-    protected $signature = 'make:tools-table {name} {--model=}';
+    protected $signature = 'make:tools-table {--model=}';
     protected $description = 'Create a new Livewire Tools Table component';
 
     public function handle()
     {
-        $name = $this->argument('name');
         $model = $this->option('model');
 
         if (!$model) {
@@ -21,13 +20,23 @@ class MakeToolsTableCommand extends Command
             return;
         }
 
-        $modelClass = Str::studly($model);
-        $componentName = Str::studly($name);
-        $namespace = "App\\Livewire\\Table";
-        $path = app_path("Livewire/Table/{$componentName}.php");
+        // Si el modelo viene con namespace completo
+        if (Str::contains($model, '\\')) {
+            $modelClass = ltrim($model, '\\');
+            $baseName = class_basename($modelClass);
+        } else {
+            $modelClass = "App\\Models\\" . Str::studly($model);
+            $baseName = Str::studly($model);
+        }
 
-        if (!File::isDirectory(app_path('Livewire/Table'))) {
-            File::makeDirectory(app_path('Livewire/Table'), 0755, true);
+        // Nombre del componente = Modelo + "Table"
+        $componentName = $baseName . 'Table';
+        $namespace = "App\\Livewire\\Tables";
+        $path = app_path("Livewire/Tables/{$componentName}.php");
+
+        // Crear carpeta si no existe
+        if (!File::isDirectory(app_path('Livewire/Tables'))) {
+            File::makeDirectory(app_path('Livewire/Tables'), 0755, true);
         }
 
         $stub = <<<PHP
@@ -36,23 +45,18 @@ class MakeToolsTableCommand extends Command
 namespace {$namespace};
 
 use Gambito404\ToolsTable\Http\Livewire\DataTable\DataTable;
-use App\Models\{$modelClass};
+use {$modelClass};
 use Gambito404\ToolsTable\Columns\NumberColumn;
 use Gambito404\ToolsTable\Columns\DateColumn;
 use Livewire\WithPagination;
 
 class {$componentName} extends DataTable
 {
-    //public {$modelClass} \$record;
-    //public string \$theme = 'light';
-
-    //public array \$perPage = [5];
-
-    public function mount(?{$modelClass} \$record = null, ?string \$theme = null)
+    public function mount(?{$baseName} \$record = null, ?string \$theme = null)
     {
-        $this->record = $record;
-        $this->mountTheme($theme ?? $this->theme);
-        $this->normalizePerPage();
+        \$this->record = \$record;
+        \$this->mountTheme(\$theme ?? \$this->theme);
+        \$this->normalizePerPage();
     }
 
     protected function columns(): array
@@ -66,18 +70,18 @@ class {$componentName} extends DataTable
 
     protected function query()
     {
-        return {$modelClass}::query();
+        return {$baseName}::query();
     }
 
     public function render()
     {
-        $rows = $this->query()->paginate($this->perPageNumber);
+        \$rows = \$this->query()->paginate(\$this->perPageNumber);
 
         return view('tools-table::components.datatable.main', [
-            'model' => {$modelClass}::class,
-            'columns' => $this->columns(),
-            'rows' => $rows,
-            'themeCss' => $this->themeCssPath(),
+            'model' => {$baseName}::class,
+            'columns' => \$this->columns(),
+            'rows' => \$rows,
+            'themeCss' => \$this->themeCssPath(),
         ]);
     }
 }
@@ -89,6 +93,6 @@ PHP;
         }
 
         File::put($path, $stub);
-        $this->info("Component {$componentName} created for model {$modelClass} at {$path}");
+        $this->info("✅ Component {$componentName} created for model {$modelClass} at {$path}");
     }
 }
