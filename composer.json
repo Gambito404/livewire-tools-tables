@@ -1,5 +1,5 @@
 {
-    "name": "gambito404/tools-table",
+    "name": "gambito404/tools-tables",
     "description": "A dynamic table component for Laravel Livewire 3.",
     "type": "library",
     "license": "MIT",
