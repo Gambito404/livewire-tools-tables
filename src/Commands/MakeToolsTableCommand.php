@@ -1,92 +1,94 @@
 <?php
 
-namespace Gambito\LivewireTable\Commands;
+namespace Gambito404\ToolsTable\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 
 class MakeToolsTableCommand extends Command
 {
-    protected $signature = 'make:tools-table {--model=}';
-    protected $description = 'Crea un componente Livewire para usar con LivewireTable';
+    protected $signature = 'make:tools-table {name} {--model=}';
+    protected $description = 'Create a new Livewire Tools Table component';
 
     public function handle()
     {
+        $name = $this->argument('name');
         $model = $this->option('model');
 
-        if (! $model) {
-            $this->error('❌ Debes especificar el modelo con --model=NombreModelo');
+        if (!$model) {
+            $this->error('You must specify a model with --model=ModelName');
             return;
         }
 
-        $name = class_basename($model);
-        $modelNamespace = "App\\Models\\$name";
+        $modelClass = Str::studly($model);
+        $componentName = Str::studly($name);
+        $namespace = "App\\Livewire\\Table";
+        $path = app_path("Livewire/Table/{$componentName}.php");
 
-        if (! class_exists($modelNamespace)) {
-            $this->error("❌ El modelo [$modelNamespace] no existe.");
-            return;
+        if (!File::isDirectory(app_path('Livewire/Table'))) {
+            File::makeDirectory(app_path('Livewire/Table'), 0755, true);
         }
-
-        $componentName = $name . 'ToolsTable';
-        $namespace = 'App\\Livewire';
-        $path = app_path("Livewire/{$componentName}.php");
-
-        if (file_exists($path)) {
-            $this->error('❌ El componente ya existe.');
-            return;
-        }
-
-        $columns = [];
-
-        try {
-            $table = (new $modelNamespace)->getTable();
-            $fields = Schema::getColumnListing($table);
-
-            foreach ($fields as $field) {
-                $title = Str::title(str_replace('_', ' ', $field));
-                $columns[] = "            Column::make('$field', '$title'),";
-            }
-
-        } catch (\Throwable $e) {
-            $this->error("❌ No se pudo leer los campos del modelo. ¿Tiene migración y tabla en la BD?");
-            return;
-        }
-
-        $columnsCode = implode("\n", $columns);
 
         $stub = <<<PHP
 <?php
 
-namespace $namespace;
+namespace {$namespace};
 
-use $modelNamespace;
-use Gambito\\LivewireTable\\Columns\\Column;
-use Gambito\\LivewireTable\\Http\\Livewire\\BaseTable;
-use Illuminate\\Database\\Eloquent\\Builder;
+use Gambito404\ToolsTable\Http\Livewire\DataTable\DataTable;
+use App\Models\{$modelClass};
+use Gambito404\ToolsTable\Columns\NumberColumn;
+use Gambito404\ToolsTable\Columns\DateColumn;
+use Livewire\WithPagination;
 
-class $componentName extends BaseTable
+class {$componentName} extends DataTable
 {
+    //public {$modelClass} \$record;
+    //public string \$theme = 'light';
+
+    //public array \$perPage = [5];
+
+    public function mount(?{$modelClass} \$record = null, ?string \$theme = null)
+    {
+        $this->record = $record;
+        $this->mountTheme($theme ?? $this->theme);
+        $this->normalizePerPage();
+    }
+
     protected function columns(): array
     {
         return [
-$columnsCode
+            NumberColumn::make('id', 'Numero'),
+            DateColumn::make('created_at', 'Created At'),
+            DateColumn::make('updated_at', 'Updated At'),
         ];
     }
 
-    protected function getRecords(): Builder
+    protected function query()
     {
-        return $name::query();
+        return {$modelClass}::query();
+    }
+
+    public function render()
+    {
+        $rows = $this->query()->paginate($this->perPageNumber);
+
+        return view('tools-table::components.datatable.main', [
+            'model' => {$modelClass}::class,
+            'columns' => $this->columns(),
+            'rows' => $rows,
+            'themeCss' => $this->themeCssPath(),
+        ]);
     }
 }
-
 PHP;
 
-        file_put_contents($path, $stub);
+        if (File::exists($path)) {
+            $this->error("Component {$componentName} already exists.");
+            return;
+        }
 
-        $this->info("✅ Componente [$componentName] creado exitosamente.");
-        $this->line("📁 Ubicación: $path");
-        $this->line("💡 Puedes usarlo en Blade con: <livewire:" . Str::kebab($componentName) . " />");
-        $this->line("👍 ¡Listo para usar con LivewireTable!");
+        File::put($path, $stub);
+        $this->info("Component {$componentName} created for model {$modelClass} at {$path}");
     }
 }

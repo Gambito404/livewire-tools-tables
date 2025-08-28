@@ -1,53 +1,27 @@
 <?php
 
-namespace Gambito\LivewireTable\Columns;
+namespace Gambito404\ToolsTable\Columns;
 
-class Column
+abstract class Column
 {
     public string $field;
-    public string $title;
+    public string $label;
+    public ?\Closure $formatCallback = null;
 
-    protected bool $sortable = false;
-
-    protected bool $hidden = false;
-
-    public function __construct(string $field, string $title)
+    public function __construct(string $field, string $label)
     {
         $this->field = $field;
-        $this->title = $title;
+        $this->label = $label;
     }
 
-    public static function make(string $field, string $title): self
+    public static function make(string $field, string $label): static
     {
-        return new self($field, $title);
+        return new static($field, $label);
     }
 
-    public function sortable(bool $value = true): self
+    public function format(\Closure $callback): self
     {
-        $this->sortable = $value;
+        $this->formatCallback = $callback;
         return $this;
-    }
-
-    public function isSortable(): bool
-    {
-        return $this->sortable;
-    }
-
-    /**
-     * Establece si la columna debe estar oculta.
-     * Recibe directamente un booleano (resultado de cualquier condición)
-     *
-     * @param bool $hidden
-     * @return $this
-     */
-    public function hidden(bool $hidden): self
-    {
-        $this->hidden = $hidden;
-        return $this;
-    }
-
-    public function isHidden(): bool
-    {
-        return $this->hidden;
     }
 }
