@@ -2,29 +2,28 @@
 
 namespace Gambito404\ToolsTables\Providers;
 
-use Illuminate\Support\ServiceProviders;
+use Illuminate\Support\ServiceProvider;
 use Gambito404\ToolsTables\Commands\MakeToolsTableCommand;
 
-
-class ToolsServiceProvider extends ServiceProviders
+class ToolsServiceProvider extends ServiceProvider
 {
     /**
      * Bootstrap del paquete.
      */
     public function boot(): void
     {
-        // Registrar vistas con alias "tools-table::"
-        $this->loadViewsFrom(__DIR__ . '/../../resources/views', 'tools-table');
+        // Registrar vistas con alias "tools-tables::"
+        $this->loadViewsFrom(__DIR__ . '/../../resources/views', 'tools-tables');
 
         // Publicar configuración
         $this->publishes([
             __DIR__ . '/../../config/tools-tables.php' => config_path('tools-tables.php'),
-        ], 'tools-table-config');
+        ], 'tools-tables-config');
 
-        // Publicar assets (css y tailwind)
+        // Publicar assets (CSS y Tailwind)
         $this->publishes([
             __DIR__ . '/../../resources/assets' => public_path('vendor/tools-tables'),
-        ], 'tools-table-assets');
+        ], 'tools-tables-assets');
 
         // Registrar comandos en consola
         if ($this->app->runningInConsole()) {
