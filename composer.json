@@ -16,13 +16,13 @@
     },
     "autoload": {
         "psr-4": {
-            "Gambito404\\ToolsTable\\": "src/"
+            "Gambito404\\ToolsTables\\": "src/"
         }
     },
     "extra": {
         "laravel": {
             "providers": [
-                "Gambito404\\ToolsTable\\Providers\\ToolsServiceProvider"
+                "Gambito404\\ToolsTables\\Providers\\ToolsServiceProvider"
             ]
         }
     },
