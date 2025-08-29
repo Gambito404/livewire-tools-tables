@@ -1,6 +1,6 @@
 <?php
 
-namespace Gambito404\ToolsTable\Commands;
+namespace Gambito404\ToolsTables\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
@@ -8,8 +8,8 @@ use Illuminate\Support\Str;
 
 class MakeToolsTableCommand extends Command
 {
-    protected $signature = 'make:tools-table {--model=}';
-    protected $description = 'Create a new Livewire Tools Table component';
+    protected $signature = 'make:tools-tables {--model=}';
+    protected $description = 'Create a new Livewire Tools Tables component';
 
     public function handle()
     {
@@ -44,10 +44,10 @@ class MakeToolsTableCommand extends Command
 
 namespace {$namespace};
 
-use Gambito404\ToolsTable\Http\Livewire\DataTable\DataTable;
+use Gambito404\ToolsTables\Http\Livewire\DataTable\DataTable;
 use {$modelClass};
-use Gambito404\ToolsTable\Columns\NumberColumn;
-use Gambito404\ToolsTable\Columns\DateColumn;
+use Gambito404\ToolsTables\Columns\NumberColumn;
+use Gambito404\ToolsTables\Columns\DateColumn;
 use Livewire\WithPagination;
 
 class {$componentName} extends DataTable
@@ -77,7 +77,7 @@ class {$componentName} extends DataTable
     {
         \$rows = \$this->query()->paginate(\$this->perPageNumber);
 
-        return view('tools-table::components.datatable.main', [
+        return view('tools-tables::components.datatable.main', [
             'model' => {$baseName}::class,
             'columns' => \$this->columns(),
             'rows' => \$rows,
