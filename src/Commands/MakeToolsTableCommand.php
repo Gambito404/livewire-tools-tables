@@ -94,5 +94,9 @@ PHP;
 
         File::put($path, $stub);
         $this->info("✅ Component {$componentName} created for model {$modelClass} at {$path}");
+
+        $livewireTag = 'tables.' . Str::kebab($componentName);
+        $this->line('\nTo use it, add the following to your Blade view:');
+        $this->info("<livewire:{$livewireTag} />");
     }
 }

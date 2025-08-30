@@ -1,6 +1,6 @@
 <?php
 
-namespace Gambito404\ToolsTable\Columns;
+namespace Gambito404\ToolsTables\Columns;
 
 class NumberColumn extends Column
 {
