@@ -9,7 +9,10 @@ abstract class Column
     public bool $searchable = false;
 
     /** @var \Closure|null */
-    protected $formatCallback = null; // 👈 ya no pública
+    protected $formatCallback = null;
+    
+    // Nueva propiedad para métodos nombrados
+    protected ?string $formatMethod = null;
 
     public function __construct(string $field, string $label)
     {
@@ -22,22 +25,36 @@ abstract class Column
         return new static($field, $label);
     }
 
+    // Opción 1: Closure (para máxima flexibilidad)
     public function format(\Closure $callback): self
     {
         $this->formatCallback = $callback;
         return $this;
     }
 
-    public function hasFormatCallback(): bool
+    // Opción 2: Método nombrado (para serialización)
+    public function formatUsing(string $methodName): self
     {
-        return $this->formatCallback !== null;
+        $this->formatMethod = $methodName;
+        return $this;
+    }
+
+    public function hasFormat(): bool
+    {
+        return $this->formatCallback !== null || $this->formatMethod !== null;
     }
 
     public function applyFormat(mixed $row): mixed
     {
-        return $this->formatCallback
-            ? call_user_func($this->formatCallback, $row)
-            : $row->{$this->field};
+        if ($this->formatCallback) {
+            return call_user_func($this->formatCallback, $row);
+        }
+        
+        if ($this->formatMethod) {
+            return call_user_func([$row, $this->formatMethod]);
+        }
+        
+        return $row->{$this->field};
     }
 
     public function searchable(): self
@@ -49,5 +66,22 @@ abstract class Column
     public function isSearchable(): bool
     {
         return $this->searchable;
+    }
+
+    /**
+     * Excluir closures de la serialización
+     */
+    public function __sleep()
+    {
+        return ['field', 'label', 'searchable', 'formatMethod'];
+    }
+
+    /**
+     * Reconstruir después de la deserialización
+     */
+    public function __wakeup()
+    {
+        // Solo perdemos los closures, los métodos nombrados se mantienen
+        $this->formatCallback = null;
     }
 }
