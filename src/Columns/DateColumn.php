@@ -4,11 +4,22 @@ namespace Gambito404\ToolsTables\Columns;
 
 class DateColumn extends Column
 {
-    public string $dateFormat = 'Y-m-d H:i:s';
+    public ?string $format = null;
 
-    public function dateFormat(string $format): self
+    public function format(string $format): self
     {
-        $this->dateFormat = $format;
+        $this->format = $format;
         return $this;
+    }
+
+    public function getValue($row, ?int $index = null)
+    {
+        $value = parent::getValue($row, $index);
+        if ($value && $this->format) {
+            setlocale(LC_TIME, 'es_ES.UTF-8'); // días y meses en español
+            $date = strtotime($value);
+            return strftime($this->format, $date);
+        }
+        return $value;
     }
 }
