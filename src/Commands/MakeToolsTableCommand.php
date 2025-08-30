@@ -9,18 +9,18 @@ use Illuminate\Support\Str;
 class MakeToolsTableCommand extends Command
 {
     protected $signature = 'make:tools-tables {--model=}';
-    protected $description = 'Create a new Livewire Tools Tables component';
+    protected $description = 'Crear un componente Livewire de Tools Tables';
 
     public function handle()
     {
         $model = $this->option('model');
 
         if (!$model) {
-            $this->error('You must specify a model with --model=ModelName');
+            $this->error('Debes especificar un modelo con --model=NombreDelModelo');
             return;
         }
 
-        // Si el modelo viene con namespace completo
+        // Determinar clase completa y nombre base
         if (Str::contains($model, '\\')) {
             $modelClass = ltrim($model, '\\');
             $baseName = class_basename($modelClass);
@@ -29,12 +29,10 @@ class MakeToolsTableCommand extends Command
             $baseName = Str::studly($model);
         }
 
-        // Nombre del componente = Modelo + "Table"
         $componentName = $baseName . 'Table';
         $namespace = "App\\Livewire\\Tables";
         $path = app_path("Livewire/Tables/{$componentName}.php");
 
-        // Crear carpeta si no existe
         if (!File::isDirectory(app_path('Livewire/Tables'))) {
             File::makeDirectory(app_path('Livewire/Tables'), 0755, true);
         }
@@ -48,23 +46,15 @@ use Gambito404\ToolsTables\Http\Livewire\DataTable\DataTable;
 use {$modelClass};
 use Gambito404\ToolsTables\Columns\NumberColumn;
 use Gambito404\ToolsTables\Columns\DateColumn;
-use Livewire\WithPagination;
 
 class {$componentName} extends DataTable
 {
-    public function mount(?{$baseName} \$record = null, ?string \$theme = null)
-    {
-        \$this->record = \$record;
-        \$this->mountTheme(\$theme ?? \$this->theme);
-        \$this->normalizePerPage();
-    }
-
     protected function columns(): array
     {
         return [
-            NumberColumn::make('id', 'Numero'),
-            DateColumn::make('created_at', 'Created At'),
-            DateColumn::make('updated_at', 'Updated At'),
+            NumberColumn::make('id', 'Número'),
+            DateColumn::make('created_at', 'Creado'),
+            DateColumn::make('updated_at', 'Actualizado'),
         ];
     }
 
@@ -75,28 +65,26 @@ class {$componentName} extends DataTable
 
     public function render()
     {
-        \$rows = \$this->query()->paginate(\$this->perPageNumber);
+        \$rows = \$this->query()->get();
 
         return view('tools-tables::components.datatable.main', [
             'model' => {$baseName}::class,
             'columns' => \$this->columns(),
             'rows' => \$rows,
-            'themeCss' => \$this->themeCssPath(),
         ]);
     }
 }
 PHP;
 
         if (File::exists($path)) {
-            $this->error("Component {$componentName} already exists.");
+            $this->error("El componente {$componentName} ya existe.");
             return;
         }
 
         File::put($path, $stub);
-        $this->info("✅ Component {$componentName} created for model {$modelClass} at {$path}");
+        $this->info("✅ Componente {$componentName} creado para el modelo {$modelClass} en {$path}");
 
         $livewireTag = 'tables.' . Str::kebab($componentName);
-        $this->line('\nTo use it, add the following to your Blade view:');
-        $this->info("<livewire:{$livewireTag} />");
+        $this->info("Para usarlo, agrega en tu Blade: <livewire:{$livewireTag} />");
     }
 }
