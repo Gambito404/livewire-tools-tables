@@ -4,22 +4,34 @@ namespace Gambito404\ToolsTables\Columns;
 
 class NumberColumn extends Column
 {
-    public bool $displayAsRowNumber = false;
-    public ?array $numberFormat = null;
+    public ?int $decimals = null;
+    public ?string $prefix = null;
+    public ?string $suffix = null;
 
-    public function displayAsRowNumber(): self
+    public function decimals(int $decimals): self
     {
-        $this->displayAsRowNumber = true;
+        $this->decimals = $decimals;
         return $this;
     }
 
-    public function numberFormat(int $decimals = 0, string $decimalSeparator = '.', string $thousandsSeparator = ','): self
+    public function prefix(string $prefix): self
     {
-        $this->numberFormat = [
-            'decimals' => $decimals,
-            'decimal_separator' => $decimalSeparator,
-            'thousands_separator' => $thousandsSeparator,
-        ];
+        $this->prefix = $prefix;
         return $this;
+    }
+
+    public function suffix(string $suffix): self
+    {
+        $this->suffix = $suffix;
+        return $this;
+    }
+
+    public function getValue($row, ?int $index = null)
+    {
+        $value = parent::getValue($row, $index);
+        if (is_numeric($value) && $this->decimals !== null) {
+            $value = number_format((float)$value, $this->decimals, '.', '');
+        }
+        return ($this->prefix ?? '') . $value . ($this->suffix ?? '');
     }
 }
