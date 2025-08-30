@@ -1,0 +1,31 @@
+.tools-table-wrapper {
+    width: 100%;
+    border-radius: 8px;
+    background-color: #ffffff;
+    font-family: 'Inter', sans-serif;
+    overflow-x: auto;
+}
+
+.tools-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tools-table-th {
+    padding: 12px 16px;
+    border-bottom: 1px solid #e5e7eb;
+    background-color: #f3f4f6;
+    font-weight: 600;
+    color: #374151;
+    text-align: left;
+}
+
+.tools-table-td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #e5e7eb;
+    color: #111827;
+}
+
+.tools-table-tr:hover {
+    background-color: #f9fafb;
+}

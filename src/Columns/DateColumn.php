@@ -2,11 +2,18 @@
 
 namespace Gambito404\ToolsTables\Columns;
 
+use Carbon\Carbon;
+
 class DateColumn extends Column
 {
-    public ?string $format = null;
+    protected string $format = 'd/m/Y';
 
-    public function format(string $format): self
+    public static function make(string $field, string $label): static
+    {
+        return new static($field, $label);
+    }
+
+    public function dateFormat(string $format): static
     {
         $this->format = $format;
         return $this;
@@ -14,12 +21,16 @@ class DateColumn extends Column
 
     public function getValue($row, ?int $index = null)
     {
-        $value = parent::getValue($row, $index);
-        if ($value && $this->format) {
-            setlocale(LC_TIME, 'es_ES.UTF-8'); // días y meses en español
-            $date = strtotime($value);
-            return strftime($this->format, $date);
+        $value = data_get($row, $this->field);
+
+        if (!$value) {
+            return '';
         }
-        return $value;
+
+        $date = $value instanceof Carbon ? $value : Carbon::parse($value);
+
+        $date->locale('es');
+
+        return $date->translatedFormat($this->format);
     }
 }

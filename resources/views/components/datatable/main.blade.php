@@ -1,15 +1,10 @@
 <div>
-    <link rel="stylesheet" href="{{ $themeCss }}">
-
-    <div class="tools-table-container">
+    <link rel="stylesheet" href="{{ asset('vendor/tools-tables/css/' . $theme . '.css') }}">
+    <div class="tools-table-wrapper">
         <div class="tools-table-header">
-            @include('tools-tables::components.datatable.search')
-            @include('tools-tables::components.datatable.per-page')
-            @include('tools-tables::components.datatable.export')
+            <h2 class="text-lg font-bold">{{ $title }}</h2>
         </div>
 
         @include('tools-tables::components.datatable.table')
-
-        @include('tools-tables::components.datatable.pagination')
     </div>
 </div>

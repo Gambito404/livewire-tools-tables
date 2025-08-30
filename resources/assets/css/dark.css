@@ -1,0 +1,31 @@
+.tools-table-wrapper {
+    width: 100%;
+    border-radius: 8px;
+    background-color: #1f2937; /* fondo oscuro */
+    font-family: 'Inter', sans-serif;
+    overflow-x: auto;
+}
+
+.tools-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tools-table-th {
+    padding: 12px 16px;
+    border-bottom: 1px solid #374151;
+    background-color: #111827; /* header oscuro */
+    font-weight: 600;
+    color: #f9fafb; /* texto claro */
+    text-align: left;
+}
+
+.tools-table-td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #374151;
+    color: #e5e7eb; /* texto claro */
+}
+
+.tools-table-tr:hover {
+    background-color: #374151; /* hover más claro sobre fondo oscuro */
+}

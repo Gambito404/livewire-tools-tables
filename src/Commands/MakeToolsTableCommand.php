@@ -37,6 +37,13 @@ class MakeToolsTableCommand extends Command
             File::makeDirectory(app_path('Livewire/Tables'), 0755, true);
         }
 
+        // Solo columnas automáticas
+        $columnsString = <<<PHP
+NumberColumn::make('id', 'ID'),
+DateColumn::make('created_at', 'Creado'),
+DateColumn::make('updated_at', 'Actualizado'),
+PHP;
+
         $stub = <<<PHP
 <?php
 
@@ -49,12 +56,13 @@ use Gambito404\ToolsTables\Columns\DateColumn;
 
 class {$componentName} extends DataTable
 {
+    //public string \$title = '';
+    //public string \$theme = '';
+
     protected function columns(): array
     {
         return [
-            NumberColumn::make('id', 'Número'),
-            DateColumn::make('created_at', 'Creado'),
-            DateColumn::make('updated_at', 'Actualizado'),
+            {$columnsString}
         ];
     }
 
@@ -68,9 +76,8 @@ class {$componentName} extends DataTable
         \$rows = \$this->query()->get();
 
         return view('tools-tables::components.datatable.main', [
-            'model' => {$baseName}::class,
             'columns' => \$this->columns(),
-            'rows' => \$rows,
+            'rows'    => \$rows,
         ]);
     }
 }
