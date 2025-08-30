@@ -19,6 +19,9 @@ abstract class DataTable extends Component
 
     public $record;
     public string $theme = 'light';
+    
+    // Cache para evitar reconstrucción múltiple
+    protected $cachedColumns;
 
     abstract protected function columns(): array;
     abstract protected function query();
@@ -35,6 +38,17 @@ abstract class DataTable extends Component
         return asset($path . $themeFile);
     }
 
+    /**
+     * Obtener columns con cache
+     */
+    protected function getColumns(): array
+    {
+        if ($this->cachedColumns === null) {
+            $this->cachedColumns = $this->columns();
+        }
+        return $this->cachedColumns;
+    }
+
     public function render()
     {
         $query = $this->query();
@@ -42,7 +56,7 @@ abstract class DataTable extends Component
         $query = $this->applySearch($query);
         $rows = $query->paginate($this->perPageNumber);
 
-        $columns = $this->columns();
+        $columns = $this->getColumns();
 
         $processedRows = $rows->map(function ($row) use ($columns) {
             $processedRow = new \stdClass();
@@ -58,14 +72,34 @@ abstract class DataTable extends Component
             return [
                 'field' => $column->field,
                 'label' => $column->label,
+                'searchable' => $column->isSearchable(),
             ];
         }, $columns);
 
         return view('tools-tables::components.datatable.main', [
             'columns' => $viewColumns,
-            'rows' => $rows, // Still needed for pagination
+            'rows' => $rows,
             'processedRows' => $processedRows,
             'themeCss' => $this->themeCssPath(),
         ]);
+    }
+
+    /**
+     * Propiedades que se pueden serializar
+     */
+    public function __sleep()
+    {
+        return [
+            'record', 'theme', 'perPageNumber', 
+            'sortField', 'sortDirection', 'search'
+        ];
+    }
+
+    /**
+     * Reconstruir después de la deserialización
+     */
+    public function __wakeup()
+    {
+        $this->cachedColumns = null; // Forzar reconstrucción
     }
 }
